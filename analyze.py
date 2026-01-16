@@ -5,6 +5,21 @@ from litellm import completion
 from dotenv import load_dotenv
 load_dotenv()
 
+def validate_itinerary(data: dict) -> bool:
+    required_fields = ["destination", "price_range", "ideal_visit_times", "top_attractions"]
+
+    for field in required_fields:
+        if field not in data:
+            return False
+
+    if not isinstance(data["ideal_visit_times"], list):
+        return False
+    if not isinstance(data["top_attractions"], list):
+        return False
+
+    return True
+
+
 
 # You can replace these with other models as needed but this is the one we suggest for this lab.
 MODEL = "groq/llama-3.3-70b-versatile"
@@ -42,5 +57,10 @@ def get_itinerary(destination: str) -> Dict[str, Any]:
     # print(response)
 
     data = json.loads(response.choices[0].message.content)
+
+    if not validate_itinerary(data):
+      raise ValueError("LLM output missing required fields or wrong types")
+    
+    print("successful")
 
     return data
